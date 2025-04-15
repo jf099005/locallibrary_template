@@ -28,7 +28,17 @@ urlpatterns = [
 urlpatterns += [
     path('catalog/', include('catalog.urls')),
 ]
+
 urlpatterns += [
-    path('', RedirectView.as_view(url='/catalog/')),
+    path('', RedirectView.as_view(url='/voc_test/MCQ')),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += [
+    path('accounts/', include('django.contrib.auth.urls')),
+]
+
+
+urlpatterns += [
+    path('voc_test/', include('voc_test.urls')),
+]

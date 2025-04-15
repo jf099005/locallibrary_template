@@ -1,0 +1,65 @@
+{% extends "base_generic.html" %}
+{% block content %}
+  <h1>here is the test page</h1>
+  <p>
+    this is a test page for multiple choice question
+    <em>Mozilla Developer Network</em>!
+  </p>
+  <h2>Dynamic content</h2>
+  <p>The library has the following record counts:</p>
+  <ul>
+    <li><strong>question:</strong> {{ question }}</li>
+  </ul>
+  <div id = 'b' >test content:{{test_content}}</div>
+
+  <button onclick="call()">this is a button</button>
+  
+    <script>
+      let x = 1000;
+    
+      document.addEventListener('keydown', function(event) {
+        // 檢查按下的是哪個鍵 (這裡以 Enter 鍵為例，keyCode 是 13)
+        if (event.key === "Enter") {  // 也可以用 event.keyCode === 13 來檢查
+          // 呼叫相同的函數，模擬按鈕點擊的效果
+          call();
+        }
+      });
+      // function call() {
+      //   fetch('/voc_test/call/', {
+      //       method: 'GET',
+      //       headers: {
+      //           'X-Requested-With': 'XMLHttpRequest'
+      //       }
+      //   }).then(
+      //     response => response.json()
+      //   ).then(
+      //     data=>{
+      //       document.getElementById('b').textContent = data['content']
+      //     }
+      //   )
+      // }
+
+      async function call() {
+          try {
+              const response = await fetch('/voc_test/call/', {
+                  method: 'GET',
+                  headers: {
+                      'X-Requested-With': 'XMLHttpRequest'
+                  }
+              });
+
+              const data = await response.json();  // 將 JSON 結果存進變數
+
+              // 接下來用 data 做多行操作
+              // const element = document.getElementById('b');
+              // element.textContent = data['content'];
+              // element.style.color = 'blue'; // 你可以自由加入其他操作
+
+          } catch (error) {
+              console.error('發生錯誤：', error);
+          }
+      }
+
+    </script>
+  
+    {% endblock %}

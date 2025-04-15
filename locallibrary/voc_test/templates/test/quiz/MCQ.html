@@ -1,0 +1,41 @@
+{% extends "base_generic.html" %}
+{% block content %}
+  <h1>here is the test page</h1>
+  <p>
+    this is a test page for multiple choice question
+    <em>Mozilla Developer Network</em>!
+  </p>
+  <h2>question: {{ question }}</h2>
+  <p>select a correct answer from following options:</p>
+  <ul>
+    {% for a in options %}
+        <button onclick = "answering('{{a}}')">{{ a }}</button>
+    {% endfor %}
+  </ul>
+
+
+<script>
+  function answering(a){
+        fetch('/voc_test/call/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',  
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'X-CSRFToken': getCookie('csrftoken')  // CSRF 保護（如果用 Django）
+                },
+                body:JSON.stringify({
+                  'answer': a
+                })
+        })
+  }
+  function getCookie(name) {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(name + '='))
+        ?.split('=')[1];
+    return cookieValue;
+  }
+
+</script>
+  
+    {% endblock %}
