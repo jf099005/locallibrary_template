@@ -3,20 +3,36 @@
   <h1>here is the test page</h1>
   <p>
     this is a test page for multiple choice question
-    <em>Mozilla Developer Network</em>!
   </p>
-  <h2>question: {{ question }}</h2>
-  <p>select a correct answer from following options:</p>
-  <ul>
+  <p id = "num_problems"> {{num_problems}}</p>
+  <h2 id = "question" >question: {{ question }}</h2>
+  <p id = "solution"></p>
+  <p id = "instruction">{{ instruction }}</p>
+  <ul id = 'options_list'>
     {% for a in options %}
         <button onclick = "answering('{{a}}')">{{ a }}</button>
     {% endfor %}
   </ul>
 
+  <button onclick="update_vocabulary()"> update problem </button>
+  
+  <form action="{% url 'logout' %}?next={{ request.path }}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
+      Logout
+    </button>
+  </form>
 
 <script>
-  function answering(a){
-        fetch('/voc_test/call/', {
+  let to_be_update = 0;
+  {% comment %} document.addEventListener('keydown', () => {
+    update_vocabulary(); // Reloads the page
+  }); {% endcomment %}
+
+  
+
+  async function answering(a){
+        const response = await fetch('/voc_test/MCQ/answering/', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',  
@@ -27,7 +43,54 @@
                   'answer': a
                 })
         })
+        const data = await response.json();
+        instruction_block = document.getElementById('instruction');
+        instruction_block.textContent = data['instruction'];
+        
+        solution_block = document.getElementById('solution');
+        solution_block.textContent = data['solution'];
+
+        to_be_update = 1;
   }
+  
+  async function update_vocabulary(){
+      const response = await fetch('/voc_test/MCQ/update_vocabulary/' ,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',  
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')  // CSRF 保護（如果用 Django）
+          }
+      });
+
+      const data = await response.json();
+
+      question_block = document.getElementById('question');
+      question_block.textContent = data['question']
+
+      num_problems = document.getElementById('num_problems');
+      num_problems.textContent = data['num_problems']
+
+      const optionsList = document.getElementById('options_list');
+      optionsList.innerHTML = '';
+
+      data['options'].forEach(option => {
+          {% comment %} const li = document.createElement('li'); {% endcomment %}
+          const btn = document.createElement('button');
+          btn.textContent = option;
+          btn.onclick = () => answering(option);
+          {% comment %} li.appendChild(btn); {% endcomment %}
+          optionsList.appendChild(btn);
+      });
+  
+      instruction_block = document.getElementById('instruction');
+      instruction_block.textContent = data['instruction'];
+      
+      solution_block = document.getElementById('solution');
+      solution_block.textContent = data['solution'];
+
+  }
+
   function getCookie(name) {
     const cookieValue = document.cookie
         .split('; ')
@@ -37,5 +100,4 @@
   }
 
 </script>
-  
     {% endblock %}

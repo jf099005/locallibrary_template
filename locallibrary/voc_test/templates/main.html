@@ -1,0 +1,9 @@
+{% extends "base_generic.html" %}
+{%block content%}
+
+{% for table_name in voc_tables%}
+    <a href = {%url 'table-detail' table_name %}> {{table_name}} </a> 
+    <p></p>
+{% endfor %}
+
+{%endblock%}

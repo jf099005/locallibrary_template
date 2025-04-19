@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<table border="1">
+    <thead>
+        <tr>
+            <th> index </th>
+            <th>{{question_type}}</th>
+            <th>{{answer_type}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in vocabulary_list %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{item.question}}</td>
+                <td>{{item.answer}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{%endblock%}
