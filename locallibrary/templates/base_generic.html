@@ -22,13 +22,11 @@
         <div class="col-sm-2">
           {% block sidebar %}
           <ul class="sidebar-nav">
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li><a href="{% url 'books' %}">All books</a></li>
-            <li><a href="">All authors</a></li>
+            <li><a href="{% url 'main' %}">Home</a></li>
             <ul class="sidebar-nav">
               {% if user.is_authenticated %}
               <li>User: {{ user.get_username }}</li>
-              <form action="{% url 'logout' %}?next={{ request.path }}" method="post" style="display:inline;">
+              <form action="{% url 'logout' %}?next=/" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
                   Logout
