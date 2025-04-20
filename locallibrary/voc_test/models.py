@@ -1,59 +1,52 @@
-from django.db import models
-from django.contrib.auth.models import User
-import uuid # Required for unique book instances
+from .vocabulary_models import *
 import random
-# Create your models here.
-class vocabulary(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text='Unique ID for this particular book across whole library')
-
-    question = models.CharField(max_length=100, default = 'test_voc')
-    answer = models.CharField(max_length=100, default = 'test_sol')
-
-    def __str__(self):
-        return self.question + ',' + self.answer
-    def reverse(self):
-        self.question, self.answer = self.answer, self.question
-    def set_content(self, q, a):
-        self.question = q
-        self.answer = a
-
-class QuizSession(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text='Unique ID for this particular book across whole library')
-    name = models.CharField(max_length=100, default='default_session')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    voc_idx = models.JSONField(default = list)
-
-class vocabulary_table(models.Model):
-    add_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True )
-    voc_list = models.JSONField(default = list)
-    name = models.CharField(max_length=100, default='default_session')
-
-
 class Quiz:
     num_choice = 4
+    name = ''
+    def __init__(self, state_dict):
+        self.answer_state = state_dict['answer_state']
+        self.vocs = state_dict['vocs']
+        self.problem_idx = state_dict['problem_idx']
+        self.choices_idx = state_dict['choices_idx']
 
-    def __init__(self, num_voc = None, voc_idx_list = None):
+    @classmethod
+    def initialize_with_vocabulary_list(cls, voc_objects):
+        voc_dict = { str(voc.id):
+                        {
+                            'question': str(voc.question),
+                            'answer': str(voc.answer),
+                        } 
+            for voc in voc_objects
+        }
+
+        problem_idx = None
+        choices_idx = None
+        answer_state = None
+        state_dict = {
+            'answer_state': answer_state,
+            'vocs': voc_dict,
+            'problem_idx': problem_idx,
+            'choices_idx': choices_idx
+            }
+        self = cls(state_dict)
+        self.load_new_problem()
+        return self
+
+
+    @classmethod
+    def randomized_initialize(cls, num_voc):
         if num_voc is None:
             return
         
-        vocs = vocabulary.objects.order_by('?').values()[:num_voc]
-        vocs = list(vocs)
-        self.vocs = { str(voc['id']):
-                        {
-                            'question': str(voc['question']),
-                            'answer': str(voc['answer']),
-                        } 
-            for voc in vocs
-        }
-        # self.quiz_session = QuizSession(voc_idx = self.vocs.keys())
-        # request.session['quiz_session'] = quiz
-        # self.quiz_session.save()
-        self.problem_idx = None
-        self.choices_idx = None
-        self.answer_state = None
-        self.load_new_problem()
-        # return self.quiz_session, vocs
-    # return render(request, 'test/quiz/MCQ.html', locals())
+        vocs_obj = vocabulary.objects.order_by('?').values()[:num_voc]
+        vocs_obj = list(vocs_obj)
+        return cls.initialize_with_vocabulary_list(vocs_obj)
+    
+    @classmethod
+    def load_from_index_list(cls, idx_list):#idx_list will be a list of string, each element is str(UUID)
+        vocs_obj = vocabulary.objects.filter(id__in=idx_list)
+        return cls.initialize_with_vocabulary_list(vocs_obj)
+    
 
     def load_state_dict(self, state_dict):
         self.answer_state = state_dict['answer_state']
@@ -114,20 +107,3 @@ class Quiz:
             'problem_idx': self.problem_idx,
             'choices_idx': self.choices_idx
             }
-
-class User_Answering(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text='Unique ID for this particular book across whole library')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    question = models.ForeignKey( vocabulary, on_delete=models.CASCADE )
-    Q2A = 'Q2A'
-    A2Q = 'A2Q'
-    genre_choice = [
-        (Q2A, 'Question_to_Answer'),
-        (A2Q, 'Answer_to_Question')
-    ]
-
-    genre_choice = models.CharField(
-        max_length= 20,
-        choices=genre_choice,
-        default=Q2A
-    )
