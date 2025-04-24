@@ -19,7 +19,7 @@ def MCQ_view(request, table_name = None):
     instruction = 'select a correct answer from following options'
     page_information = {
         'question' : question,
-        'options' : options,
+        'options' : list(options),
         'instruction' : instruction,
         'num_problems' : quiz.remain_vocs
     }
@@ -35,8 +35,8 @@ def MCQ_answering(request):
 
     quiz_model = Quiz(request.session['quiz'])
 
-    print(quiz_model.answering(reply))
-    print(quiz_model.vocs[ quiz_model.problem_idx ])
+    # print(quiz_model.answering(reply))
+    # print(quiz_model.vocs[ quiz_model.problem_idx ])
     
     solution = ''
     if quiz_model.answering(reply):
@@ -44,13 +44,13 @@ def MCQ_answering(request):
         solution = 'correct!'
     else:
         quiz_model.answer_state = False
-        solution = 'wrong...'
+        solution = 'wrong..... the correct solution is ' + quiz_model.vocs[quiz_model.problem_idx]['answer']
         
     instruction = 'press any key to continue'
     
     response = {'solution': solution,
                 'instruction': instruction}
-    print('new problem:', quiz_model.get_problem_view())
+    # print('new problem:', quiz_model.get_problem_view())
     request.session['quiz'] = quiz_model.state_dict()
     return JsonResponse(response)    # num_voc = vocabulary.objects.all().count()
 
@@ -61,7 +61,7 @@ def MCQ_update_vocabulary(request):
     quiz_model.update_problem()
 
     question, options = quiz_model.get_problem_view()
-    print('update problem:', question, options, quiz_model.get_problem_view())
+    # print('update problem:', question, options, quiz_model.get_problem_view())
 
     instruction = 'select a correct answer from following options'
     solution = ''

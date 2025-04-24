@@ -87,6 +87,9 @@ class Quiz:
     # when user answering correct, this function remove problem from problemset and load a new problem
     def update_problem(self):
         print(self.answer_state)
+        if self.answer_state is None:
+            return False
+    
         if self.answer_state is True:
             print('delete problem')
             self.vocs.pop(self.problem_idx, None)

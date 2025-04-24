@@ -4,13 +4,16 @@
   <p>
     this is a test page for multiple choice question
   </p>
+
   <p id = "num_problems"> {{num_problems}}</p>
-  <h2 id = "question" >question: {{ question }}</h2>
+  <h2 id = "question"  style="font-size: 30px;" >question: {{ question }}</h2>
   <p id = "solution"></p>
   <p id = "instruction">{{ instruction }}</p>
   <ul id = 'options_list'>
     {% for a in options %}
-        <button onclick = "answering('{{a}}')">{{ a }}</button>
+    <li>
+        <button  style="font-size: 28px;" id="option{{ forloop.counter  }}" onclick="answering('{{ a }}')">{{forloop.counter }}:{{ a }}</button>
+    </li>
     {% endfor %}
   </ul>
 
@@ -25,13 +28,36 @@
 
 <script>
   let to_be_update = 0;
+
   {% comment %} document.addEventListener('keydown', () => {
     update_vocabulary(); // Reloads the page
-  }); {% endcomment %}
+  });  {% endcomment %}
+  
+  document.addEventListener('keydown', function(event) {
+    const validKeys = ['1', '2', '3', '4', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4'];
+    console.log("Pressed:", event.key);
+    // 只接受鍵盤上方的數字 1~4（鍵碼 49~52）
+    const key = event.key;
+    if (validKeys.includes(key)) {
+      const index = key.replace('Numpad', '') || key;
+      const button = document.getElementById('option' + index);
+        if (button) {
+            button.click();
+        }
+    }
+
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault(); // 防止頁面滾動
+      // 呼叫其他事件或函數
+      update_vocabulary();
+    }
+
+});
 
   
 
   async function answering(a){
+    console.log("answering\n");
         const response = await fetch('/voc_test/MCQ/answering/', {
                 method: 'POST',
                 headers: {
@@ -74,11 +100,12 @@
       const optionsList = document.getElementById('options_list');
       optionsList.innerHTML = '';
 
-      data['options'].forEach(option => {
+      data['options'].forEach((option, index) => {
           {% comment %} const li = document.createElement('li'); {% endcomment %}
           const btn = document.createElement('button');
           btn.textContent = option;
           btn.onclick = () => answering(option);
+          btn.id = 'option' + (index + 1);
           {% comment %} li.appendChild(btn); {% endcomment %}
           optionsList.appendChild(btn);
       });
